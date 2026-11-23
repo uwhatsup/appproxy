@@ -50,12 +50,13 @@
 ## 验证
 
 - `flutter analyze`：0 error
-- `flutter test`：28/28 通过（解析、备份合并、改名迁移、备份包、UID 选择、`include_uid` 生成等）
+- `flutter test`：29/29 通过（解析、备份合并、改名迁移、备份包、UID 选择、`include_uid` 生成、重启保留未解析 UID 等）
 - `flutter build apk --debug` / `--release --split-per-abi --target-platform android-arm64`：通过
 - 真机（Android 13 / root）验证：
   - 粘贴识别回填、保存、双击改名
   - 追加/覆盖还原（含同名跳过与覆盖结果）
   - 主应用/分身独立勾选与持久化：只勾 `com.tencent.mm`（UID 10230）、只勾分身（UID 99910230）、两者都勾均可
+  - 重启后未重新扫描时仍保留已选 UID：eBPF 可继续启动，VPN 会提示先扫描，避免误变全机代理
   - 只勾分身启动 VPN 时被拦截；混合选择时提示分身不会生效
   - 提供的 HTTP 代理实测：直连出口 IP `27.37.43.8` → 代理后 `36.138.11.224`（广州），IP 确实发生变化
   - `sing-box check` 验证 `include_uid` 配置合法
