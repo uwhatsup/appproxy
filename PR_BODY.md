@@ -1,7 +1,7 @@
 ## 变更内容
 
 - **还原备份**：新增「追加还原 / 覆盖还原」两种模式；追加模式保留本机配置、同名跳过，覆盖模式清空后写入备份。
-- **粘贴识别**：添加代理页支持从粘贴内容识别字段；内置 `@` / `#` / `|` 和完整 URL 四套规则，可新增/编辑/删除规则、自定义分隔符与字段顺序。
+- **粘贴识别**：添加代理页支持从粘贴内容识别字段；内置 `@` / `#` / `|`、完整 URL，以及**服务商 4 段/6 段格式**（`host|port|user|pass|到期|地区`，忽略后两段并固定 socks5），可新增/编辑/删除规则、自定义分隔符与字段顺序。
 - **配置名可修改**：双击编辑时名称可改；同步迁移设置侧 eBPF 标记与当前选中名，并做重名校验。
 - **多用户/分身应用**：应用列表按用户拆分为独立行并显示用户号（如 `用户 0` / `用户 999`）；**主应用与分身可分别勾选、分别保存**（按 UID）；新增 root 扫描入口。
   - eBPF 使用 `include_uid` 精确到具体 UID，只代理选中的主应用或分身；
@@ -43,6 +43,9 @@
 ### 9. 排除模式（勾选走直连，且已勾选项置顶）
 ![排除模式](https://raw.githubusercontent.com/uwhatsup/appproxy/pr-assets/pr-assets/09-exclude-mode.png)
 
+### 10. 服务商 `|` 格式粘贴识别
+![服务商格式识别](https://raw.githubusercontent.com/uwhatsup/appproxy/pr-assets/pr-assets/10-provider-paste.png)
+
 ## 兼容性与说明
 
 - 旧版纯 `.json` 备份仍可直接还原；「配置 + 二进制」备份为 `.zip`，文件头自动识别。
@@ -54,7 +57,7 @@
 ## 验证
 
 - `flutter analyze`：0 error
-- `flutter test`：32/32 通过（解析、备份合并、改名迁移、备份包、UID 选择、`include_uid`/`exclude_uid` 生成、重启保留未解析 UID、排除模式持久化等）
+- `flutter test`：34/34 通过（解析、备份合并、改名迁移、备份包、UID 选择、`include_uid`/`exclude_uid` 生成、重启保留未解析 UID、排除模式、服务商格式识别等）
 - `flutter build apk --debug` / `--release --split-per-abi --target-platform android-arm64`：通过
 - 真机（Android 13 / root）验证：
   - 粘贴识别回填、保存、双击改名
@@ -63,6 +66,7 @@
   - 重启后未重新扫描时仍保留已选 UID：eBPF 可继续启动，VPN 会提示先扫描，避免误变全机代理
   - 排除模式：勾选 Via（UID 10249）后，VPN 网络 UID 允许列表不含 10249/自身 10248；shell 仍走代理并返回 `36.138.11.224`，即排除应用确实直连
   - 排序：勾选应用后立即置顶，取消勾选恢复原顺序
+  - 服务商 `host|port|user|pass|到期|地区` 粘贴识别：域名 SOCKS5 `ch15.canghaiip.com:47890` 正确回填并保存；App 代理后出口 `113.13.73.84`（广西柳州），直连 `27.37.43.8`
   - 只勾分身启动 VPN 时被拦截；混合选择时提示分身不会生效
   - 提供的 HTTP 代理实测：直连出口 IP `27.37.43.8` → 代理后 `36.138.11.224`（广州），IP 确实发生变化
   - `sing-box check` 验证 `include_uid` / `exclude_uid` 配置合法
